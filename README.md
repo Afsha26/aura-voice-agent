@@ -33,6 +33,12 @@ uvicorn main:app --reload
 
 The health check is available at `http://127.0.0.1:8000/health`; interactive API documentation is at `http://127.0.0.1:8000/docs`.
 
+The backend also provides `GET /orders/{order_id}` for mock order lookups and `GET /policies` for the store policies. Run the backend tests from the `backend` folder:
+
+```powershell
+python -m unittest discover -s tests -v
+```
+
 ## Project structure
 
 ```text
@@ -50,7 +56,9 @@ aura-voice-agent/
 │   ├── main.py
 │   ├── orders.py
 │   ├── policies.py
-│   └── requirements.txt
+│   ├── requirements.txt
+│   └── tests/
+│       └── test_backend.py
 ├── .gitignore
 └── README.md
 ```
