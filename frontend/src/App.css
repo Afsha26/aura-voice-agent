@@ -1,0 +1,273 @@
+:root {
+  font-family: Arial, sans-serif;
+  color: #28271f;
+  background: #f8f5f0;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  font-weight: 400;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  min-width: 320px;
+  min-height: 100vh;
+  margin: 0;
+}
+
+button {
+  font: inherit;
+}
+
+.app-shell {
+  width: min(100% - 40px, 1040px);
+  margin: 0 auto;
+  padding: 72px 0;
+}
+
+.page-header {
+  margin-bottom: 36px;
+}
+
+.eyebrow {
+  margin: 0 0 10px;
+  color: #8b7357;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+}
+
+h1,
+h2,
+p {
+  margin-top: 0;
+}
+
+h1,
+h2 {
+  font-family: Georgia, serif;
+  font-weight: 500;
+}
+
+h1 {
+  margin-bottom: 10px;
+  font-size: clamp(2rem, 5vw, 3.2rem);
+  letter-spacing: -0.04em;
+}
+
+h2 {
+  margin-bottom: 0;
+  font-size: 1.45rem;
+}
+
+.subtitle,
+.muted-text {
+  color: #77756d;
+}
+
+.subtitle {
+  margin-bottom: 0;
+}
+
+.call-card,
+.panel {
+  border: 1px solid #e9e3d9;
+  border-radius: 16px;
+  background: #fffefa;
+  box-shadow: 0 12px 32px rgb(53 43 26 / 4%);
+}
+
+.call-card {
+  padding: 26px 30px;
+}
+
+.call-card-header,
+.panel-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+.call-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  margin: 0;
+  color: #77756d;
+  font-size: 0.9rem;
+}
+
+.status-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: #b3afa6;
+}
+
+.call-status.active {
+  color: #48765a;
+}
+
+.call-status.active .status-dot {
+  background: #5b9b70;
+  box-shadow: 0 0 0 4px #e8f2e9;
+}
+
+.call-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 24px;
+}
+
+.button {
+  min-height: 44px;
+  padding: 0 20px;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: opacity 150ms ease, background 150ms ease;
+}
+
+.button:disabled {
+  cursor: not-allowed;
+  opacity: 0.48;
+}
+
+.button-primary {
+  color: white;
+  background: #78634c;
+}
+
+.button-primary:not(:disabled):hover {
+  background: #65513c;
+}
+
+.button-secondary {
+  border-color: #ded7cc;
+  color: #514b41;
+  background: transparent;
+}
+
+.button-secondary:not(:disabled):hover {
+  background: #f5f1eb;
+}
+
+.content-grid {
+  display: grid;
+  grid-template-columns: 1.1fr 0.9fr;
+  gap: 20px;
+  margin-top: 20px;
+}
+
+.panel {
+  min-height: 270px;
+  padding: 24px;
+}
+
+.panel-label {
+  padding: 6px 10px;
+  border-radius: 20px;
+  color: #797267;
+  background: #f4f0e9;
+  font-size: 0.75rem;
+}
+
+.transcript-empty {
+  display: flex;
+  min-height: 168px;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+.transcript-icon {
+  display: grid;
+  width: 38px;
+  height: 38px;
+  margin-bottom: 12px;
+  place-items: center;
+  border-radius: 50%;
+  color: #806d54;
+  background: #f3eee5;
+  font-family: Georgia, serif;
+  font-size: 1rem;
+}
+
+.transcript-empty p {
+  margin-bottom: 5px;
+  font-weight: 500;
+}
+
+.muted-text {
+  font-size: 0.82rem;
+}
+
+.order-list {
+  display: grid;
+  gap: 14px;
+  margin: 24px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.order-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid #eee9e1;
+}
+
+.order-item:last-child {
+  padding-bottom: 0;
+  border-bottom: 0;
+}
+
+.order-item strong,
+.order-id {
+  display: block;
+}
+
+.order-item strong {
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.order-id {
+  margin-top: 5px;
+  color: #858178;
+  font-size: 0.78rem;
+}
+
+.order-status {
+  white-space: nowrap;
+  color: #667d63;
+  font-size: 0.8rem;
+}
+
+@media (max-width: 680px) {
+  .app-shell {
+    width: min(100% - 28px, 520px);
+    padding: 40px 0;
+  }
+
+  .call-card {
+    padding: 22px;
+  }
+
+  .call-card-header {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .content-grid {
+    grid-template-columns: 1fr;
+  }
+}
