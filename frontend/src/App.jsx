@@ -3,6 +3,7 @@ import './App.css';
 import { AudioPlaybackQueue } from './audioPlaybackQueue.js';
 
 const OUTPUT_SAMPLE_RATE = 24_000;
+const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL ?? '').replace(/\/$/, '');
 const VOICE_DIAGNOSTICS_ENABLED = new URLSearchParams(window.location.search).has('voiceDebug');
 
 function App() {
@@ -140,7 +141,7 @@ function App() {
     setSummaryLoading(true);
     setSummaryError('');
     try {
-      const response = await fetch(`/calls/${encodeURIComponent(callId)}/summary`, {
+      const response = await fetch(`${API_BASE_URL}/calls/${encodeURIComponent(callId)}/summary`, {
         method: 'POST',
       });
       const result = await response.json();
@@ -450,8 +451,9 @@ function App() {
       audioContextRef.current = audioContext;
       await audioContext.resume();
 
-      const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-      const socket = new WebSocket(`${protocol}//${window.location.host}/ws/voice`);
+      const socketUrl = new URL('/ws/voice', API_BASE_URL || window.location.origin);
+      socketUrl.protocol = socketUrl.protocol === 'https:' ? 'wss:' : 'ws:';
+      const socket = new WebSocket(socketUrl.toString());
       socket.binaryType = 'arraybuffer';
       socketRef.current = socket;
       socket.onmessage = handleSocketMessage;
@@ -491,7 +493,7 @@ function App() {
 
   useEffect(() => {
     let active = true;
-    fetch('/sample-orders')
+    fetch(`${API_BASE_URL}/sample-orders`)
       .then(async (response) => {
         if (!response.ok) throw new Error('Could not load the sample orders.');
         return response.json();
