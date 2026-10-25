@@ -33,16 +33,23 @@ The project combines a React/Vite interface, a FastAPI backend, and the Gemini L
 
 Dependency versions are not pinned in `backend/requirements.txt`; the frontend versions and lockfile are defined in `frontend/package.json` and `frontend/package-lock.json`.
 
-## Architecture and voice flow
+## Architecture and engineering decisions
 
-1. The React app requests microphone permission and captures audio with an AudioWorklet. The worklet converts microphone audio to mono 16 kHz PCM.
-2. The browser sends those audio frames over a WebSocket to FastAPI at `/ws/voice`. During local development, Vite proxies this WebSocket to `127.0.0.1:8000`.
-3. FastAPI reads the backend-only `GEMINI_API_KEY` and forwards audio to Gemini Live using `gemini-3.8-live`.
-4. Gemini may request a declared support tool. FastAPI executes it against the local mock orders or configured policy helpers, then sends the result back to the Live session.
-5. Gemini's 24 kHz PCM audio is relayed through FastAPI to the browser and scheduled for playback. Transcription events are grouped and sent to the transcript UI. The frontend does not receive the API key.
-6. After the call ends, the browser requests `POST /calls/{call_id}/summary`. FastAPI summarizes the stored transcript and tool results using `gemini-3.5-flash-lite`, validates the JSON with Pydantic, and returns a JSON object.
+The application separates real-time voice interaction, backend business logic, and post-call summary generation.
 
-The model handles conversation and decides when to call a tool; backend order and policy modules determine the factual results returned by those tools. Call context is held in memory, not in a database.
+![Aura AI Voice Agent Architecture](docs/architecture.png)
+
+*Figure 1: High-level architecture of the Aura Skincare AI Voice Agent.*
+
+- Keep API credentials and Gemini SDK calls in the backend rather than exposing credentials to the browser.
+- Use model tool calls for conversational routing, but deterministic Python functions and mock data for order and policy facts.
+- Stream microphone audio and assistant audio through one backend WebSocket so the key and tool execution remain backend-side.
+- Keep transcript/tool context in memory for the call and discard it after a successful summary. Context also expires after one hour; there is no persistent call database.
+- Validate summary input/output with Pydantic and return structured JSON. Summary-generation errors are surfaced to the frontend, while the transcript remains available.
+- Use mocked model interactions for ordinary backend tests so the suite does not depend on a live API request.
+
+This is an assessment/demo implementation, not a production support platform.
+
 
 ## Project structure
 
@@ -233,19 +240,19 @@ This is an assessment/demo implementation, not a production support platform.
 
 ### 1. Why did you choose your particular architecture and technology stack?
 
-I chose React with Vite for a small, responsive browser interface and Python with FastAPI for the APIs and WebSocket connection. Gemini Live handles realtime conversation, while backend tools keep order and policy facts deterministic and keep the API key out of the browser.
+I chose React with Vite for a responsive browser interface and Python with FastAPI for backend APIs and WebSocket communication. Gemini Live handles real-time voice conversations, while backend tools keep order lookups and policy-related operations controlled and deterministic. Keeping the API key on the backend also avoids exposing it in the browser. This separation makes the application easier to test, maintain, and extend.
 
 ### 2. What was the most difficult part of the assignment, and how did you solve it?
 
-The most difficult part was coordinating streaming voice, transcript events, tool calls, and call cleanup without mixing internal events into the conversation or stopping audio too early. I separated transcript aggregation and audio playback scheduling from the UI state, and kept order and policy decisions in backend helpers. Live acoustic behavior still needs manual verification across real conversations.
+The most difficult part was coordinating streaming audio, transcript events, tool calls, and call cleanup without displaying internal events as conversation messages or interrupting audio prematurely. I organized transcript aggregation and audio playback scheduling separately from UI state, while keeping order and policy logic in backend helpers. I also tested the order lookup and summary flows. The live audio experience still requires manual verification across different real-world conversations.
 
 ### 3. If you had one more week to work on this, what would you improve first and why?
 
-I would first add repeatable end-to-end voice tests and diagnostics around turn completion, interruptions, and playback timing. Those checks would make regressions easier to reproduce before expanding the features.
+I would first improve automated end-to-end voice testing and add diagnostics for turn completion, interruptions, and playback timing. Since voice interaction is the core of this application, these checks would help identify latency and playback issues, reproduce regressions, and make conversations more reliable before adding further features.
 
 ### 4. Imagine this agent is handling 1,000 customer conversations a day. What do you think would need to change or improve?
 
-I would replace in-memory call state with a deliberate storage/retention design, add authentication and rate limiting, and run the backend on infrastructure that can scale concurrent WebSocket sessions. I would also add monitoring for latency, failures, and quota usage, plus privacy controls and load testing. Those capabilities are not implemented in this demo.
+I would replace in-memory call state with a deliberate storage and retention strategy, add authentication and rate limiting, and deploy the backend on infrastructure designed to support concurrent WebSocket sessions. I would also introduce monitoring for latency, failures, and API quota usage, alongside privacy controls and load testing. Before production use, I would verify that the system can handle expected traffic reliably and control operational costs. These scaling and production-readiness capabilities are not yet implemented in this demo.
 
 ## Known limitations
 
@@ -258,7 +265,7 @@ I would replace in-memory call state with a deliberate storage/retention design,
 ## Submission checklist
 
 - Public application URL: **PENDING DEPLOYMENT**
-- GitHub repository: **[Add repository URL]**
+- **GitHub Repository:** [aura-voice-agent](https://github.com/Afsha26/aura-voice-agent)
 - Demo video: **PENDING RECORDING**
-- LinkedIn profile: **[Add LinkedIn profile URL]**
+- **LinkedIn profile:** [Shaikh Afsha](https://www.linkedin.com/in/shaikh-afsha/)
 
