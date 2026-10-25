@@ -1,8 +1,10 @@
 import unittest
+from unittest.mock import patch
 
 from fastapi.testclient import TestClient
+from starlette.websockets import WebSocketDisconnect
 
-from main import app
+from main import ALLOWED_VOICE_ORIGINS, app
 from orders import get_order_details, lookup_order
 from policies import (
     get_policy_details,
@@ -146,6 +148,52 @@ class ApiTests(unittest.TestCase):
         response = self.client.get("/policies")
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.json(), get_policy_details())
+
+    def test_cors_allows_deployed_frontend_origin(self) -> None:
+        origin = "https://aria-voice-agent-eight.vercel.app"
+        response = self.client.options(
+            "/calls/test-call/summary",
+            headers={
+                "Origin": origin,
+                "Access-Control-Request-Method": "POST",
+                "Access-Control-Request-Headers": "content-type",
+            },
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.headers["access-control-allow-origin"], origin)
+        self.assertIn("POST", response.headers["access-control-allow-methods"])
+        self.assertNotIn("access-control-allow-credentials", response.headers)
+
+    def test_cors_does_not_allow_unconfigured_origin(self) -> None:
+        response = self.client.get(
+            "/health",
+            headers={"Origin": "https://untrusted.example"},
+        )
+
+        self.assertNotIn("access-control-allow-origin", response.headers)
+
+    def test_websocket_allowlist_includes_deployed_frontend(self) -> None:
+        origin = "https://aria-voice-agent-eight.vercel.app"
+        self.assertIn(origin, ALLOWED_VOICE_ORIGINS)
+
+        with patch("main.dotenv_values", return_value={}):
+            with self.client.websocket_connect(
+                "/ws/voice",
+                headers={"Origin": origin},
+            ) as websocket:
+                self.assertEqual(
+                    websocket.receive_json()["type"],
+                    "error",
+                )
+
+    def test_websocket_rejects_unconfigured_origin(self) -> None:
+        with self.assertRaises(WebSocketDisconnect):
+            with self.client.websocket_connect(
+                "/ws/voice",
+                headers={"Origin": "https://untrusted.example"},
+            ):
+                pass
 
 
 if __name__ == "__main__":

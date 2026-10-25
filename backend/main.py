@@ -11,6 +11,7 @@ import websockets
 from dotenv import dotenv_values
 from fastapi import FastAPI, HTTPException
 from fastapi import WebSocket, WebSocketDisconnect
+from fastapi.middleware.cors import CORSMiddleware
 from google import genai
 from google.genai import errors, types
 from starlette.websockets import WebSocketState
@@ -26,6 +27,13 @@ from orders import get_order_details
 from policies import get_policy_details, is_cancellation_eligible
 
 app = FastAPI(title="Aura Skincare Support API")
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["https://aria-voice-agent-eight.vercel.app"],
+    allow_credentials=False,
+    allow_methods=["GET", "POST"],
+    allow_headers=["*"],
+)
 LIVE_MODEL_ID = "gemini-3.8-live"
 CALL_CONTEXT_TTL_SECONDS = 60 * 60
 CALL_CONTEXTS: dict[str, dict[str, Any]] = {}
@@ -59,6 +67,7 @@ BACKEND_ENV_FILE = Path(__file__).with_name(".env")
 ALLOWED_VOICE_ORIGINS = {
     "http://localhost:5173",
     "http://127.0.0.1:5173",
+    "https://aria-voice-agent-eight.vercel.app",
 }
 
 
