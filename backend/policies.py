@@ -5,12 +5,19 @@ from typing import Optional
 
 
 RETURN_WINDOW_DAYS = 7
+FREE_DELIVERY_THRESHOLD_INR = 499
+BELOW_THRESHOLD_SHIPPING_FEE_INR = 50
+COD_MAXIMUM_ORDER_AMOUNT_INR = 2500
+SHIPPING_BOUNDARY_NOTE = (
+    "The policy does not specify the shipping fee for an order of exactly ₹499."
+)
 
 POLICY_INFO: dict[str, object] = {
     "delivery": {
-        "free_delivery_for_orders_above_inr": 499,
-        "shipping_fee_inr_for_orders_below_inr": 499,
-        "shipping_fee_inr": 50,
+        "free_delivery_for_orders_above_inr": FREE_DELIVERY_THRESHOLD_INR,
+        "shipping_fee_inr_for_orders_below_inr": FREE_DELIVERY_THRESHOLD_INR,
+        "shipping_fee_inr": BELOW_THRESHOLD_SHIPPING_FEE_INR,
+        "exact_threshold_note": SHIPPING_BOUNDARY_NOTE,
         "standard_delivery": "3–5 business days",
     },
     "returns": {
@@ -33,7 +40,7 @@ POLICY_INFO: dict[str, object] = {
         ),
     },
     "cash_on_delivery": {
-        "maximum_order_amount_inr": 2500,
+        "maximum_order_amount_inr": COD_MAXIMUM_ORDER_AMOUNT_INR,
         "payment_methods": ["cash", "UPI"],
         "payment_due": "at the doorstep",
     },
@@ -47,6 +54,40 @@ POLICY_INFO: dict[str, object] = {
 def get_policy_details() -> dict[str, object]:
     """Return policy data for the API without exposing mutable shared state."""
     return deepcopy(POLICY_INFO)
+
+
+def get_return_policy_details() -> dict[str, object]:
+    """Return complete return and damaged/defective product policies."""
+    policies = get_policy_details()
+    return {
+        "returns": policies["returns"],
+        "damaged_or_defective_products": policies["damaged_or_defective_products"],
+    }
+
+
+def get_shipping_policy(order_amount_inr: int) -> dict[str, object]:
+    """Apply the stated strict bounds; the exact ₹499 boundary is unspecified."""
+    if order_amount_inr > FREE_DELIVERY_THRESHOLD_INR:
+        return {"status": "free", "shipping_fee_inr": 0}
+    if order_amount_inr < FREE_DELIVERY_THRESHOLD_INR:
+        return {
+            "status": "fee_applies",
+            "shipping_fee_inr": BELOW_THRESHOLD_SHIPPING_FEE_INR,
+        }
+    return {
+        "status": "unspecified_boundary",
+        "shipping_fee_inr": None,
+        "message": SHIPPING_BOUNDARY_NOTE,
+    }
+
+
+def is_cod_eligible(order_amount_inr: int) -> bool:
+    """COD is available through and including the configured maximum amount."""
+    if not isinstance(order_amount_inr, int) or isinstance(order_amount_inr, bool):
+        return False
+    if order_amount_inr < 0:
+        return False
+    return order_amount_inr <= COD_MAXIMUM_ORDER_AMOUNT_INR
 
 
 def is_cancellation_eligible(order: Optional[Mapping[str, object]]) -> bool:

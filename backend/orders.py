@@ -1,4 +1,5 @@
 from copy import copy
+import re
 from typing import Optional
 
 
@@ -34,9 +35,16 @@ ORDERS: dict[str, dict[str, object]] = {
 }
 
 
+def normalize_order_id(order_id: str) -> str:
+    """Normalize supported shorthand such as "order 101" to "ORD-101"."""
+    normalized = order_id.strip().upper()
+    match = re.fullmatch(r"(?:ORD(?:ER)?[-\s]*)?(\d{3})", normalized)
+    return f"ORD-{match.group(1)}" if match else normalized
+
+
 def get_order_details(order_id: str) -> Optional[dict[str, object]]:
     """Return mock order details, or None when the ID is not found."""
-    order = ORDERS.get(order_id)
+    order = ORDERS.get(normalize_order_id(order_id))
     return copy(order) if order else None
 
 
