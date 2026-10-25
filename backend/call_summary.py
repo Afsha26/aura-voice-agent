@@ -1,4 +1,5 @@
 import json
+import os
 import re
 from datetime import datetime
 from pathlib import Path
@@ -16,6 +17,13 @@ from orders import get_order_details
 SUMMARY_MODEL_ID = "gemini-3.5-flash-lite"
 SUMMARY_ENV_FILE = Path(__file__).with_name(".env")
 ORDER_ID_PATTERN = re.compile(r"\bORD-\d+\b", re.IGNORECASE)
+
+
+def _get_gemini_api_key() -> str | None:
+    api_key = os.environ.get("GEMINI_API_KEY")
+    if not api_key or not api_key.strip():
+        api_key = dotenv_values(SUMMARY_ENV_FILE).get("GEMINI_API_KEY")
+    return api_key.strip() if api_key and api_key.strip() else None
 
 
 class TranscriptEntry(BaseModel):
@@ -172,12 +180,11 @@ def generate_call_summary(
             call_summary="No conversational transcript was captured during the call.",
         )
 
-    api_key = dotenv_values(SUMMARY_ENV_FILE).get("GEMINI_API_KEY")
-    if not api_key or not api_key.strip():
+    api_key = _get_gemini_api_key()
+    if not api_key:
         raise SummaryGenerationError(
             "Call summary is unavailable because the backend GEMINI_API_KEY is not configured."
         )
-    api_key = api_key.strip()
 
     verified_order_ids = _verified_order_ids(transcript, tool_results)
     prompt = _summary_prompt(transcript, tool_results, verified_order_ids)

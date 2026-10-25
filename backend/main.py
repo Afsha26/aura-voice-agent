@@ -1,5 +1,6 @@
 import asyncio
 import json
+import os
 import secrets
 import time
 from datetime import datetime, timezone
@@ -69,6 +70,13 @@ ALLOWED_VOICE_ORIGINS = {
     "http://127.0.0.1:5173",
     "https://aria-voice-agent-eight.vercel.app",
 }
+
+
+def _get_gemini_api_key() -> str | None:
+    api_key = os.environ.get("GEMINI_API_KEY")
+    if not api_key or not api_key.strip():
+        api_key = dotenv_values(BACKEND_ENV_FILE).get("GEMINI_API_KEY")
+    return api_key.strip() if api_key and api_key.strip() else None
 
 
 @app.get("/health")
@@ -290,15 +298,14 @@ async def voice_session(websocket: WebSocket) -> None:
         return
 
     await websocket.accept()
-    api_key = dotenv_values(BACKEND_ENV_FILE).get("GEMINI_API_KEY")
-    if not api_key or not api_key.strip():
+    api_key = _get_gemini_api_key()
+    if not api_key:
         await websocket.send_json(
             {"type": "error", "message": "The backend GEMINI_API_KEY is not configured."}
         )
         await websocket.close(code=1011)
         return
 
-    api_key = api_key.strip()
     client = genai.Client(api_key=api_key)
 
     try:

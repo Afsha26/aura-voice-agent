@@ -177,15 +177,16 @@ class ApiTests(unittest.TestCase):
         origin = "https://aria-voice-agent-eight.vercel.app"
         self.assertIn(origin, ALLOWED_VOICE_ORIGINS)
 
-        with patch("main.dotenv_values", return_value={}):
-            with self.client.websocket_connect(
-                "/ws/voice",
-                headers={"Origin": origin},
-            ) as websocket:
-                self.assertEqual(
-                    websocket.receive_json()["type"],
-                    "error",
-                )
+        with patch.dict("os.environ", {}, clear=True):
+            with patch("main.dotenv_values", return_value={}):
+                with self.client.websocket_connect(
+                    "/ws/voice",
+                    headers={"Origin": origin},
+                ) as websocket:
+                    self.assertEqual(
+                        websocket.receive_json()["type"],
+                        "error",
+                    )
 
     def test_websocket_rejects_unconfigured_origin(self) -> None:
         with self.assertRaises(WebSocketDisconnect):

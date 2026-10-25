@@ -45,6 +45,9 @@ def valid_summary(
 
 class CallSummaryTests(unittest.TestCase):
     def setUp(self) -> None:
+        self.env_vars_patch = patch.dict("os.environ", {"GEMINI_API_KEY": ""})
+        self.env_vars_patch.start()
+        self.addCleanup(self.env_vars_patch.stop)
         self.env_patch = patch("call_summary.dotenv_values", return_value={"GEMINI_API_KEY": "test-key"})
         self.env_patch.start()
         self.addCleanup(self.env_patch.stop)
