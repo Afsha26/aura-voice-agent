@@ -264,8 +264,8 @@ I would replace in-memory call state with a deliberate storage and retention str
 
 ## Submission checklist
 
-- Public application URL: **PENDING DEPLOYMENT**
+- **Public application URL:** PENDING DEPLOYMENT
 - **GitHub Repository:** [aura-voice-agent](https://github.com/Afsha26/aura-voice-agent)
-- Demo video: **PENDING RECORDING**
+- **Demo video:** PENDING RECORDING
 - **LinkedIn profile:** [Shaikh Afsha](https://www.linkedin.com/in/shaikh-afsha/)
 
