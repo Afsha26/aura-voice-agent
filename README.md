@@ -264,8 +264,7 @@ I would replace in-memory call state with a deliberate storage and retention str
 
 ## Submission checklist
 
-- **Public application URL:** PENDING DEPLOYMENT
+- **Public application URL:** https://aria-voice-agent-eight.vercel.app/
 - **GitHub Repository:** [aura-voice-agent](https://github.com/Afsha26/aura-voice-agent)
-- **Demo video:** PENDING RECORDING
+- **Demo video:** https://drive.google.com/file/d/1mV-Dbrjb4Pptl6e91S7VbZ3bWu3_Dhp4/view?usp=sharing
 - **LinkedIn profile:** [Shaikh Afsha](https://www.linkedin.com/in/shaikh-afsha/)
-
